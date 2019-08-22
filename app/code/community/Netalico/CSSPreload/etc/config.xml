@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Netalico_CSSPreload>
+            <version>1.0.0</version>
+        </Netalico_CSSPreload>
+    </modules>
+    <global>
+        <blocks>
+            <csspreload>
+                <class>Netalico_CSSPreload_Block</class>
+            </csspreload>
+        </blocks>
+        <helpers>
+            <csspreload>
+                <class>Netalico_CSSPreload_Helper</class>
+            </csspreload>
+        </helpers>
+    </global>
+    <frontend>
+        <layout>
+            <updates>
+                <csspreload>
+                    <file>csspreload.xml</file>
+                </csspreload>
+            </updates>
+        </layout>
+    </frontend>
+</config>

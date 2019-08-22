@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <default>
+        <reference name="head">
+            <action method="addItem"><type>js</type><name>lib/csspreload.js</name><params>async="true"</params></action>
+            <action method="removeItem"><type>skin_css</type><name>css/print.css</name></action>
+            <action method="removeItem"><type>skin_css</type><name>css/styles.css</name></action>
+            <action method="removeItem"><type>skin_css</type><name>css/madisonisland.css</name></action>
+            <block type="csspreload/preload" name="head.csspreload">
+                <action method="setLinkTemplate">
+                    <value><![CDATA[<link rel="preload" as="style" href=":path:" onload="this.rel='stylesheet'" :attributes: />]]></value>
+                </action>
+                <action method="setAssets">
+                    <value>
+                        <madisonisland>
+                            <path>css/madisonisland.css</path>
+                            <attributes>
+                                <media>all</media>
+                            </attributes>
+                        </madisonisland>
+                        <styles>
+                            <path>css/styles.css</path>
+                            <attributes>
+                                <media>all</media>
+                            </attributes>
+                        </styles>
+                        <print>
+                            <path>css/print.css</path>
+                            <attributes>
+                                <media>print</media>
+                            </attributes>
+                        </print>
+                    </value>
+                </action>
+            </block>
+        </reference>
+    </default>
+</layout>

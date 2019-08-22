@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Netalico_CSSPreload>
+            <active>true</active>
+            <codePool>community</codePool>
+            <depends>
+                <Mage_Page/>
+            </depends>
+        </Netalico_CSSPreload>
+    </modules>
+</config>
