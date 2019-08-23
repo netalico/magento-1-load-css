@@ -1,53 +1,64 @@
 <?php
 
-class Netalico_CSSPreload_Block_Preload extends Mage_Core_Block_Template
+class Netalico_CSSPreload_Block_Preload extends Mage_Page_Block_Html_Head
 {
     const PATTERN_ATTRS = ':attributes:';
     const PATTERN_URL   = ':path:';
+    const LINK_TEMPLATE = '<link rel="preload" as="style" href=":path:" onload="this.rel=\'stylesheet\'" :attributes: />';
 
-    protected function _toHtml()
+    protected function &_prepareStaticAndSkinElements($format, array $staticItems, array $skinItems,
+                                                      $mergeCallback = null)
     {
-        $html = '';
-        $assets = $this->getAssets();
-        $designPackage = Mage::getDesign();
-
-        if (empty($assets)) {
-            return "\n<!-- CSS Preload: No assets provided -->\n";
-        }
-
-        if (!$this->hasLinkTemplate()) {
-            return "\n<!-- CSS Preload: No template defined -->\n";
-        }
-
         $shouldMergeCss = Mage::getStoreConfigFlag('dev/css/merge_css_files');
-        if($shouldMergeCss) {
-            $assetUrls = array();
-            foreach ($assets as $asset) {
-                foreach($asset['attributes'] as $attributeName => $attributeValue) {
-                    if($attributeName == 'media') {
-                        if(!isset($assetUrls[$attributeValue])) {
-                            $assetUrls[$attributeValue] = array();
-                        }
-                        $assetUrls[$attributeValue][] = $designPackage->getFilename($asset['path'], array('_type' => 'skin'));
-                    }
-                }
-            }
-            foreach($assetUrls as $media => $urls) {
-                $mergedUrl = call_user_func(array(Mage::getDesign(), 'getMergedCssUrl'), $urls);
-                $html .= $this->renderLinkTemplate($mergedUrl, 'media="'.$media.'"');
-            }
-        } else {
-            foreach ($assets as $asset) {
-                $attributesHtml = array();
-                foreach($asset['attributes'] as $attributeName => $attributeValue) {
-                    $attributesHtml[] = sprintf('%s="%s"', $attributeName, $attributeValue);
-                }
+        $enableCSSPreload = Mage::getStoreConfigFlag('dev/css/csspreload');
+        if(!$shouldMergeCss || !$enableCSSPreload) {
+            return parent::_prepareStaticAndSkinElements($format, $staticItems, $skinItems, $mergeCallback);
+        }
 
-                $assetUrl = $this->getSkinUrl($asset['path']);
-                $html .= $this->renderLinkTemplate($assetUrl, implode(' ',$attributesHtml));
+        $designPackage = Mage::getDesign();
+        $baseJsUrl = Mage::getBaseUrl('js');
+        $items = array();
+        if ($mergeCallback && !is_callable($mergeCallback)) {
+            $mergeCallback = null;
+        }
+
+        // get static files from the js folder, no need in lookups
+        foreach ($staticItems as $params => $rows) {
+            foreach ($rows as $name) {
+                $items[$params][] = $mergeCallback ? Mage::getBaseDir() . DS . 'js' . DS . $name : $baseJsUrl . $name;
             }
         }
 
+        // lookup each file basing on current theme configuration
+        foreach ($skinItems as $params => $rows) {
+            foreach ($rows as $name) {
+                $items[$params][] = $mergeCallback ? $designPackage->getFilename($name, array('_type' => 'skin'))
+                    : $designPackage->getSkinUrl($name, array());
+            }
+        }
+
+        $html = '';
+        foreach ($items as $params => $rows) {
+            // attempt to merge
+            $mergedUrl = false;
+            if ($mergeCallback) {
+                $mergedUrl = call_user_func($mergeCallback, $rows);
+            }
+            // render elements
+            $params = trim($params);
+            $params = $params ? ' ' . $params : '';
+            if ($mergedUrl) {
+                if(substr($mergedUrl, -4) == '.css') {
+                    $html .= $this->renderLinkTemplate($mergedUrl, $params);
+                } else {
+                    $html .= sprintf($format, $mergedUrl, $params);
+                }
+            } else {
+                foreach ($rows as $src) {
+                    $html .= sprintf($format, $src, $params);
+                }
+            }
+        }
         return $html;
     }
 
@@ -56,7 +67,7 @@ class Netalico_CSSPreload_Block_Preload extends Mage_Core_Block_Template
         return str_replace(
             [self::PATTERN_URL, self::PATTERN_ATTRS],
             [$assetUrl, $additionalAttributes],
-            $this->getLinkTemplate()
+            self::LINK_TEMPLATE
         );
     }
 }

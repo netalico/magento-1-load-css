@@ -10,6 +10,11 @@
             <csspreload>
                 <class>Netalico_CSSPreload_Block</class>
             </csspreload>
+            <page>
+                <rewrite>
+                    <html_head>Netalico_CSSPreload_Block_Preload</html_head>
+                </rewrite>
+            </page>
         </blocks>
         <helpers>
             <csspreload>
