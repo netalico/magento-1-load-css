@@ -2,7 +2,7 @@
 <layout version="0.1.0">
     <default>
         <reference name="head">
-            <action method="addItem"><type>js</type><name>lib/csspreload.js</name><params>async="true"</params></action>
+            <block type="core/template" name="csspreload.js" template="csspreload/script.phtml" />
         </reference>
     </default>
 </layout>

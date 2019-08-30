@@ -6,8 +6,6 @@
             <codePool>community</codePool>
             <depends>
                 <Mage_Page/>
-                <Smartwave_Porto />
-                <Mirasvit_Seo />
             </depends>
         </Netalico_CSSPreload>
     </modules>
